@@ -1,6 +1,6 @@
 import pygame
 import random
-from algorithms.sorting import Bubble_Sort
+from algorithms.sorting import Bubble_Sort, Selection_Sort, Insertion_Sort
 def main():
     pygame.init()
     screen = pygame.display.set_mode((1280,720))
@@ -16,7 +16,9 @@ def main():
     back_button = pygame.Rect(menu_area.left, menu_area.bottom-100, 150,70)
     #bubble_button = pygame.Rect(300,150,200,50)
     sorting_functions = {
-        "Bubble Sort" : Bubble_Sort
+        "Bubble Sort" : Bubble_Sort,
+        "Selection Sort" : Selection_Sort,
+        "Insertion Sort" : Insertion_Sort
     }
     scroll_offset = 0
     running = True
@@ -24,6 +26,7 @@ def main():
     pressed = False
     Menu_algorithms_chose = Menu_algorithms.keys()
     algorithm_generator = None
+    data = random.sample(range(1,101),10)
     current_state = {"array": data, "comparing": None}
     paused = False
     while running:
@@ -33,7 +36,7 @@ def main():
         start_x = screen_width/2
 
         for i, algorithm in enumerate(Menu_algorithms_chose):
-            content_height = len(Menu_algorithms) * gap
+            content_height = len(Menu_algorithms_chose) * gap
             max_scroll = max(0,content_height - menu_area.height)
             scroll_offset = max(0, min(scroll_offset, max_scroll))
             start_y+=gap
@@ -59,7 +62,6 @@ def main():
                     if button[0].collidepoint(event.pos):
                         selected_algorithm = button[1]
                         if Start_menu == False:
-                            data = random.sample(range(1,101),5)
                             algorithm_name = sorting_functions[selected_algorithm]
                             algorithm_generator = algorithm_name(data)
                             current_state = {"array": data.copy(), "comparing": None}
@@ -98,10 +100,28 @@ def main():
                screen.blit(text_surface, text_surface.get_rect(center = button[0].center))
            screen.set_clip(None)
         elif current_screen == "VIZUALIZING":
-            text = font.render("we will continue", True,(255,255,255))
-            screen.blit(text, (50,50))
+            if not paused and algorithm_generator is not None:
+                try:
+                    current_state = next(algorithm_generator)
+                except StopIteration:
+                    pass
+            arr = current_state["array"]
+            comparing = current_state["comparing"]
+            bar_width = 1280 // len(arr)
+            max_val = max(arr)
+            for i, val in enumerate(arr):
+                color = (255,100,100) if comparing and i in comparing else (70,130,180)
+                height = int((val/max_val)*400)
+                x = i * bar_width
+                y = 720 - height
+                pygame.draw.rect(screen, color,(x,y,bar_width-5, height))
+
+                #draw number
+                text_num = font.render(str(val), True, (255,255,255))
+                text_rect = text_num.get_rect(center = (x+bar_width//2,y-15))
+                screen.blit(text_num, text_rect)
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(5)
     pygame.quit()
 if __name__ == "__main__":
     main()
