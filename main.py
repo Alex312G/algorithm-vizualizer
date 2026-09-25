@@ -1,25 +1,47 @@
 import pygame
 import random
-from algorithms.sorting import Bubble_Sort, Selection_Sort, Insertion_Sort
+from algorithms.sorting import Bubble_Sort, Selection_Sort, Insertion_Sort, Merge_Sort
+from vizualizer.renderer import algorithm_explained
 def main():
     pygame.init()
     screen = pygame.display.set_mode((1280,720))
     clock = pygame.time.Clock()
     pygame.display.set_caption("Vizual Algo")
     font = pygame.font.SysFont(None, 36)
+    description_font = pygame.font.SysFont(None, 26)
     current_screen = "MENU"
     selected_algorithm = None
     Menu_algorithms = {"Sorting" : ["Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort", "Radix Sort"], "Data Structures" : [], "Graphs" : [], "Number Theory" : [], "Dynamic Programming" : [], "Strings" : [], "Math" : []}
+    Vizualizing_buttons = ("speed_up", "speed_down", "pause")
+    buttons_vizualize = []
     screen_width = 840
     gap = 100
+    frame_limit = 15
     menu_area = pygame.Rect(0,100,screen_width,600)
     back_button = pygame.Rect(menu_area.left, menu_area.bottom-100, 150,70)
+    x_first_button = screen_width + 100
+    y_first_button = 100
+
+    for i, butt in enumerate(Vizualizing_buttons):
+        pos_x = x_first_button
+        pos_y = y_first_button + i * 100
+        rect = pygame.Rect(pos_x, pos_y, 200, 50)
+        buttons_vizualize.append((rect, butt))
     #bubble_button = pygame.Rect(300,150,200,50)
+    #sortings
     sorting_functions = {
         "Bubble Sort" : Bubble_Sort,
         "Selection Sort" : Selection_Sort,
-        "Insertion Sort" : Insertion_Sort
+        "Insertion Sort" : Insertion_Sort,
+        "Merge Sort" : Merge_Sort
     }
+    sorting_explained = {
+        "Bubble Sort": "The algorithm iterates trough the array, it tries to find a value that is not in its place, if found the algorithm continues, ok = 1, if not the algorithm will stop, ok remains 0, Complexity: O(n^2)",
+        "Selection Sort" : "The simplest sorting algorithm will get trough each value and will search in the values that remain after, the smallest/biggest that could be placed in that position Complexity: O(n^2).",
+        "Insertion Sort" : "This algorithm searches trough the values that are in the array one that is smaller than the value/values before it then it moves it to a position where this is false, it is similar to finding if a sequence of brackets is correct. Complexity: O(n^2)",
+        "Merge Sort" : "We take the values and divide the array in intervals until we get to the smallest possible then we merge the values as we go back in the function, the smallest intervals are sorted so each of the next intervals of bigger values will be sorted, Complexity: O(n*log n)."
+    }
+    
     scroll_offset = 0
     running = True
     Start_menu = True
@@ -29,6 +51,7 @@ def main():
     data = random.sample(range(1,101),10)
     current_state = {"array": data, "comparing": None}
     paused = False
+    frame_counter = 0
     while running:
         #showing buttons precalculate
         buttons = []
@@ -69,7 +92,20 @@ def main():
                         else:
                             pressed = True
                             Start_menu = False
-                        
+                for button in buttons_vizualize:
+                    if button[0].collidepoint(event.pos):
+                        if current_screen == "VIZUALIZING":
+                            if button[1] == "speed_up":
+                                if frame_limit > 0:
+                                    frame_limit -= 5
+                            elif button[1] == "speed_down":
+                                if frame_limit < 60:
+                                    frame_limit += 5
+                            elif button[1] == "pause":
+                                if paused:
+                                    paused = False
+                                else:
+                                    paused = True
                         #current_screen = "SELECTION MENU"
         screen.fill((30, 30, 30))
         #Menu screen with all the buttons shown
@@ -101,27 +137,60 @@ def main():
            screen.set_clip(None)
         elif current_screen == "VIZUALIZING":
             if not paused and algorithm_generator is not None:
-                try:
-                    current_state = next(algorithm_generator)
-                except StopIteration:
-                    pass
+                frame_counter += 1
+                if frame_counter >= frame_limit:
+                    frame_counter = 0
+                    try:
+                        current_state = next(algorithm_generator)
+                    except StopIteration:
+                        pass
             arr = current_state["array"]
             comparing = current_state["comparing"]
-            bar_width = 1280 // len(arr)
+            bar_width = screen_width // len(arr)
             max_val = max(arr)
+            num_pos = 560
+            pygame.draw.line(screen, (255,255,255), (0,num_pos - 50),(0,num_pos+150),5)
             for i, val in enumerate(arr):
-                color = (255,100,100) if comparing and i in comparing else (70,130,180)
+                if comparing and i in comparing:
+                    color1 = (255,100,100)
+                    color2 = (255,100,100)  
+                else: 
+                    color1 = (70,130,180)
+                    color2 = (255,255,255)
                 height = int((val/max_val)*400)
                 x = i * bar_width
-                y = 720 - height
-                pygame.draw.rect(screen, color,(x,y,bar_width-5, height))
-
-                #draw number
+                y = 500 - height
+                pygame.draw.rect(screen, color1,(x,y,bar_width-5, height))
+                
+                #draw buttons
+                for rect in buttons_vizualize:
+                    pygame.draw.rect(screen, (255,255,255), rect[0])
+                    text_buttons = font.render(rect[1],True, (0,0,0))
+                    text_rect_butt = text_buttons.get_rect(center = rect[0].center)
+                    screen.blit(text_buttons, text_rect_butt)
+                #explaination of algorithm
+                pos_x = x_first_button
+                pos_y = y_first_button + len(Vizualizing_buttons) * 100
+                lines = algorithm_explained(sorting_explained[selected_algorithm], description_font, max_width=300)
+                title = font.render(selected_algorithm, True, (255,255,255))
+                screen.blit(title, (pos_x, pos_y))
+                pos_y += 40
+                for i, line in enumerate(lines):
+                    line_paragraph = description_font.render(line, True, (255,255,255))
+                    screen.blit(line_paragraph, (pos_x, pos_y + i * 28))
+                #draw vector
+                pygame.draw.line(screen, (255,255,255),(0,num_pos+50),(screen_width,num_pos+50),5)
+                pygame.draw.line(screen, (255,255,255),(0,num_pos+150),(screen_width,num_pos+150),5)
+                pygame.draw.line(screen, (255,255,255),(0,num_pos-50),(screen_width,num_pos-50),5)
+                pygame.draw.line(screen, (255,255,255),(x+bar_width,num_pos-50),(x+bar_width,num_pos+150),5)
+                text_vect = font.render(str(i), True, color2)
+                text_rect_v = text_vect.get_rect(center = (x + bar_width//2,num_pos))
                 text_num = font.render(str(val), True, (255,255,255))
-                text_rect = text_num.get_rect(center = (x+bar_width//2,y-15))
+                text_rect = text_num.get_rect(center = (x+bar_width//2,num_pos + 100))
+                screen.blit(text_vect, text_rect_v)
                 screen.blit(text_num, text_rect)
         pygame.display.flip()
-        clock.tick(5)
+        clock.tick(60)
     pygame.quit()
 if __name__ == "__main__":
     main()

@@ -44,3 +44,43 @@ def Insertion_Sort(arr):
             pos -= 1
             yield {"array" : arr.copy(), "comparing" : (pos,pos-1)}
     yield {"array" : arr.copy(), "comparing" : None} 
+def Merge_Sort(arr):
+    arr = arr.copy()
+    yield from Merge_Sort_Alg(arr, 0, len(arr)-1)
+    yield {"array": arr.copy(), "comparing" : None}
+
+def Merge_Sort_Alg(arr, st, dr):
+    if st < dr:
+        mid = int((st+dr)//2)
+        yield from Merge_Sort_Alg(arr, st, mid)
+        yield from Merge_Sort_Alg(arr, mid+1,dr)
+
+        temp = []
+        j = mid+1
+        i = st
+        yield {"array": arr.copy(), "comparing" : (i, j)}
+        while i <= mid and j <= dr:
+            
+            if arr[i] <= arr[j]:
+                temp.append(arr[i])
+                i+=1
+            else:
+                temp.append(arr[j])
+                j+=1
+            #yield {"array": arr.copy(), "comparing" : (i,j)}
+        while j <= dr:
+            temp.append(arr[j])
+            j+=1
+            yield {"array": arr.copy(), "comparing" : (i,i)}
+        while i<=mid:
+            temp.append(arr[i])
+            i+=1
+            yield {"array": arr.copy(), "comparing" : (i,i)}
+        z = 0
+        i = st
+        while i<=dr:
+            arr[i] = temp[z]
+            z+=1
+            i+=1
+            yield {"array": arr.copy(), "comparing" : (i,i)}
+        yield {"array": arr.copy(), "comparing" : None}
