@@ -84,3 +84,32 @@ def Merge_Sort_Alg(arr, st, dr):
             i+=1
             yield {"array": arr.copy(), "comparing" : (i,i)}
         yield {"array": arr.copy(), "comparing" : None}
+def Quick_Sort(arr):
+    arr = arr.copy()
+    yield from Quick_Sort_Alg(arr, 0, len(arr)-1)
+    yield {"array" : arr.copy(), "comparing" : None}
+def Quick_Sort_Alg(arr, st, dr):
+    print(st, end = ' ')
+    print(dr)
+    if st < dr:
+        m = int((st + dr)//2)
+        aux = arr[st]
+        arr[st] = arr[m]
+        arr[m] = aux
+        i = st
+        j = dr 
+        d = 0
+        i = int(i)
+        j = int(j)
+        while i < j:
+            yield {"array" : arr.copy(), "comparing" : (i,j)}
+            if arr[i] > arr[j]:
+                aux = arr[i]
+                arr[i] = arr[j]
+                arr[j] = aux
+                d = 1-d
+                yield {"array" : arr.copy(), "comparing" : (i,j)}
+            i += d
+            j -= 1-d
+        yield from Quick_Sort_Alg(arr, st, i-1)
+        yield from Quick_Sort_Alg(arr, i+1, dr)

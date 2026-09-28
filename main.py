@@ -1,6 +1,6 @@
 import pygame
 import random
-from algorithms.sorting import Bubble_Sort, Selection_Sort, Insertion_Sort, Merge_Sort
+from algorithms.sorting import Bubble_Sort, Selection_Sort, Insertion_Sort, Merge_Sort, Quick_Sort
 from vizualizer.renderer import algorithm_explained
 def main():
     pygame.init()
@@ -33,13 +33,15 @@ def main():
         "Bubble Sort" : Bubble_Sort,
         "Selection Sort" : Selection_Sort,
         "Insertion Sort" : Insertion_Sort,
-        "Merge Sort" : Merge_Sort
+        "Merge Sort" : Merge_Sort,
+        "Quick Sort" : Quick_Sort
     }
     sorting_explained = {
         "Bubble Sort": "The algorithm iterates trough the array, it tries to find a value that is not in its place, if found the algorithm continues, ok = 1, if not the algorithm will stop, ok remains 0, Complexity: O(n^2)",
         "Selection Sort" : "The simplest sorting algorithm will get trough each value and will search in the values that remain after, the smallest/biggest that could be placed in that position Complexity: O(n^2).",
         "Insertion Sort" : "This algorithm searches trough the values that are in the array one that is smaller than the value/values before it then it moves it to a position where this is false, it is similar to finding if a sequence of brackets is correct. Complexity: O(n^2)",
-        "Merge Sort" : "We take the values and divide the array in intervals until we get to the smallest possible then we merge the values as we go back in the function, the smallest intervals are sorted so each of the next intervals of bigger values will be sorted, Complexity: O(n*log n)."
+        "Merge Sort" : "We take the values and divide the array in intervals until we get to the smallest possible then we merge the values as we go back in the function, the smallest intervals are sorted so each of the next intervals of bigger values will be sorted, Complexity: O(n*log n).",
+        "Quick Sort" : "It's an efficent way of sorting an array by choosing a pivot that u then use to get all the smaller elements before it and the bigger values after the pivot, it is a divide et impera sorting method because it then takes the intervals and repeats the process. Worst Complexity when sorted, normal complexity: O(n*logn)"
     }
     
     scroll_offset = 0
